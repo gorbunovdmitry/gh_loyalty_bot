@@ -195,4 +195,4 @@ app.post('/api/chat', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5002;
-app.listen(PORT, () => console.log(`Backend started on port ${PORT}`)); 
+app.listen(PORT, () => console.log(`Backend started on port ${PORT}`)); // Force Render update Thu Aug 28 17:10:58 MSK 2025

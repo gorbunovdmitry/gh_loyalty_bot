@@ -166,6 +166,9 @@ app.post('/api/chat', async (req, res) => {
   
   try {
     // 1. Запрос к Gemini
+    console.log('System prompt:', SYSTEM_PROMPT.substring(0, 100) + '...');
+    console.log('User message:', userMessage);
+    
     const geminiRes = await axios.post(GEMINI_API_URL, {
       systemInstruction: {
         parts: [{ text: SYSTEM_PROMPT }]
@@ -173,6 +176,7 @@ app.post('/api/chat', async (req, res) => {
       contents: [{ parts: [{ text: userMessage }] }]
     });
     aiReply = geminiRes.data.candidates?.[0]?.content?.parts?.[0]?.text || 'Нет ответа от AI';
+    console.log('AI reply:', aiReply.substring(0, 100) + '...');
   } catch (e) {
     console.error('Gemini error:', e?.response?.data || e.message);
     aiReply = 'Ошибка AI: ' + (e?.response?.data?.error?.message || e.message);

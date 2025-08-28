@@ -164,6 +164,20 @@ app.post('/api/chat', async (req, res) => {
   const promptCount = req.body.promptcount;
   if (!userMessage) return res.status(400).json({ reply: 'Нет сообщения' });
 
+  // ЖЕСТКИЙ ФИЛЬТР: Если вопрос не про систему лояльности - блокируем
+  const loyaltyKeywords = ['альфа-выгодно', 'выгодно', 'кэшбэк', 'баллы', 'бонусы', 'партнеры', 'витрина', 'лояльность', 'скидки', 'акции'];
+  const blockedKeywords = ['жку', 'жилищно-коммунальные', 'коммунальные услуги', 'электричество', 'вода', 'газ', 'отопление', 'мусор'];
+  
+  const userMessageLower = userMessage.toLowerCase();
+  const hasLoyaltyKeyword = loyaltyKeywords.some(keyword => userMessageLower.includes(keyword));
+  const hasBlockedKeyword = blockedKeywords.some(keyword => userMessageLower.includes(keyword));
+  
+  if (hasBlockedKeyword && !hasLoyaltyKeyword) {
+    return res.json({ 
+      reply: 'Я помогаю только по вопросам системы лояльности «Альфа-Выгодно» и «Витрина партнёров». Пожалуйста, задайте вопрос по этим темам.' 
+    });
+  }
+
   const fullPrompt = `${SYSTEM_PROMPT}\n\n${userMessage}`;
 
   let aiReply = '';

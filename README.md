@@ -1,3 +1,9 @@
+# GH_Loyalty_bot - VERSION 2.0.0 LOYALTY-ONLY SYSTEM
+
+## 🚀 UPDATED: Ultra-aggressive loyalty-only system prompt
+## 🔒 BLOCKS ALL NON-LOYALTY QUESTIONS  
+## ✅ READY FOR RENDER DEPLOYMENT
+
 # Чат с Google Gemini AI
 
 ## Запуск

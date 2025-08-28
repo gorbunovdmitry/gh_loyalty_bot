@@ -163,6 +163,7 @@ app.post('/api/chat', async (req, res) => {
   const fullPrompt = `${SYSTEM_PROMPT}\n\n${userMessage}`;
 
   let aiReply = '';
+  
   try {
     // 1. Запрос к Gemini
     const geminiRes = await axios.post(GEMINI_API_URL, {

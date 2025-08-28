@@ -170,10 +170,7 @@ app.post('/api/chat', async (req, res) => {
     console.log('User message:', userMessage);
     
     const geminiRes = await axios.post(GEMINI_API_URL, {
-      systemInstruction: {
-        parts: [{ text: SYSTEM_PROMPT }]
-      },
-      contents: [{ parts: [{ text: userMessage }] }]
+      contents: [{ parts: [{ text: fullPrompt }] }]
     });
     aiReply = geminiRes.data.candidates?.[0]?.content?.parts?.[0]?.text || 'Нет ответа от AI';
     console.log('AI reply:', aiReply.substring(0, 100) + '...');

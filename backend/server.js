@@ -167,7 +167,10 @@ app.post('/api/chat', async (req, res) => {
   try {
     // 1. Запрос к Gemini
     const geminiRes = await axios.post(GEMINI_API_URL, {
-      contents: [{ parts: [{ text: fullPrompt }] }]
+      systemInstruction: {
+        parts: [{ text: SYSTEM_PROMPT }]
+      },
+      contents: [{ parts: [{ text: userMessage }] }]
     });
     aiReply = geminiRes.data.candidates?.[0]?.content?.parts?.[0]?.text || 'Нет ответа от AI';
   } catch (e) {

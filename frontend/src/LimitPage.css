@@ -1,0 +1,55 @@
+.limit-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.limit-container {
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  color: white;
+}
+
+.limit-content h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.limit-content p {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+  opacity: 0.9;
+}
+
+.reset-button {
+  padding: 12px 24px;
+  background: white;
+  color: #ff6b6b;
+  border: none;
+  border-radius: 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.reset-button:hover {
+  transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .limit-content h2 {
+    font-size: 1.8rem;
+  }
+  
+  .limit-content p {
+    font-size: 1rem;
+  }
+}

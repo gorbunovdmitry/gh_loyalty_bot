@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import LandingPage from './LandingPage';
+import CreditsPage from './CreditsPage';
+import LimitPage from './LimitPage';
 
 const BACKEND_URL = 'https://gh-loyalty-bot.onrender.com';
 
@@ -9,15 +12,18 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [questionCount, setQuestionCount] = useState(0);
   const [landingShown, setLandingShown] = useState(false);
+  const [creditsShown, setCreditsShown] = useState(false);
   const [limitReached, setLimitReached] = useState(false);
 
   useEffect(() => {
     const savedCount = localStorage.getItem('questionCount');
     const savedLanding = localStorage.getItem('landingShown');
+    const savedCredits = localStorage.getItem('creditsShown');
     const savedLimit = localStorage.getItem('limitReached');
     
     if (savedCount) setQuestionCount(parseInt(savedCount));
     if (savedLanding === 'true') setLandingShown(true);
+    if (savedCredits === 'true') setCreditsShown(true);
     if (savedLimit === 'true') setLimitReached(true);
   }, []);
 
@@ -54,10 +60,10 @@ function App() {
       setQuestionCount(newCount);
       localStorage.setItem('questionCount', newCount.toString());
       
-      // Check limit
-      if (newCount >= 5) {
-        setLimitReached(true);
-        localStorage.setItem('limitReached', 'true');
+      // Check limit - show credits page after 5 questions
+      if (newCount >= 5 && !creditsShown) {
+        setCreditsShown(true);
+        localStorage.setItem('creditsShown', 'true');
       }
       
     } catch (error) {
@@ -80,42 +86,35 @@ function App() {
     localStorage.setItem('landingShown', 'true');
   };
 
+  const continueWithPayment = () => {
+    setCreditsShown(false);
+    setLimitReached(true);
+    localStorage.setItem('creditsShown', 'false');
+    localStorage.setItem('limitReached', 'true');
+  };
+
   const resetApp = () => {
     setMessages([]);
     setQuestionCount(0);
     setLandingShown(false);
+    setCreditsShown(false);
     setLimitReached(false);
     localStorage.clear();
   };
 
   // Landing Page
   if (!landingShown) {
-    return (
-      <div className="landing-page">
-        <div className="landing-content">
-          <h1>Календарь вашей выгоды на неделю</h1>
-          <p>Получите персональные рекомендации по выгодным покупкам и узнайте, когда лучше тратить деньги</p>
-          <button onClick={startChat} className="start-button">
-            Попробовать бесплатно
-          </button>
-        </div>
-      </div>
-    );
+    return <LandingPage onStart={startChat} />;
   }
 
-  // Limit Page
+  // Credits Page (after 5 questions)
+  if (creditsShown) {
+    return <CreditsPage onContinue={continueWithPayment} />;
+  }
+
+  // Limit Page (final page)
   if (limitReached) {
-    return (
-      <div className="limit-page">
-        <div className="limit-content">
-          <h2>Лимит бесплатных вопросов исчерпан</h2>
-          <p>Продукта не существует.</p>
-          <button onClick={resetApp} className="reset-button">
-            Начать заново
-          </button>
-        </div>
-      </div>
-    );
+    return <LimitPage onReset={resetApp} />;
   }
 
   // Chat Page

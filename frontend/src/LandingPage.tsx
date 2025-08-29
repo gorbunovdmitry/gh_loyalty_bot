@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 
 // Import images from public folder
-const calendarImg = '/img/calendar.png';
-const calendar2Img = '/img/calendar2.png';
-const clockImg = '/img/clock.svg';
-const percentImg = '/img/percent.svg';
-const rubFlagImg = '/img/rub-flag.svg';
+const calendarImg = `${process.env.PUBLIC_URL}/img/calendar.png`;
+const calendar2Img = `${process.env.PUBLIC_URL}/img/calendar2.png`;
+const clockImg = `${process.env.PUBLIC_URL}/img/clock.svg`;
+const percentImg = `${process.env.PUBLIC_URL}/img/percent.svg`;
+const rubFlagImg = `${process.env.PUBLIC_URL}/img/rub-flag.svg`;
 
 interface LandingPageProps {
   onStartChat: () => void;

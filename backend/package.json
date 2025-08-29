@@ -1,6 +1,6 @@
 {
   "name": "gemini-backend",
-  "version": "2.0.0-LOYALTY-ONLY",
+  "version": "2.1.0-CLEAN-LOYALTY",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {

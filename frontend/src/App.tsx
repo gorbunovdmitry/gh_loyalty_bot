@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import LandingPage from './LandingPage';
-import CreditsPage from './CreditsPage';
-import LimitPage from './LimitPage';
 
 const BACKEND_URL = 'https://gh-loyalty-bot.onrender.com';
 
@@ -104,62 +101,147 @@ function App() {
 
   // Landing Page
   if (!landingShown) {
-    return <LandingPage onStart={startChat} />;
+    return (
+      <div className="landing-container">
+        <div className="landing-content">
+          <div className="landing-graphic">
+            <img src="/img/calendar.png" alt="Calendar" className="main-calendar" />
+          </div>
+          
+          <h1 className="landing-title">
+            Календарь вашей выгоды на неделю
+          </h1>
+          
+          <p className="landing-description">
+            Получите персональные рекомендации по выгодным покупкам и узнайте, когда лучше тратить деньги
+          </p>
+          
+          <div className="features-list">
+            <div className="feature-item">
+              <div className="feature-icon">
+                <img src="/img/clock.svg" alt="Clock" className="feature-icon-img" />
+              </div>
+              <span className="feature-text">Узнайте, когда выгоднее покупать</span>
+            </div>
+            
+            <div className="feature-item">
+              <div className="feature-icon">
+                <img src="/img/percent.svg" alt="Percent" className="feature-icon-img" />
+              </div>
+              <span className="feature-text">Получите максимальный кэшбэк</span>
+            </div>
+            
+            <div className="feature-item">
+              <div className="feature-icon">
+                <img src="/img/rub-flag.svg" alt="Rub Flag" className="feature-icon-img" />
+              </div>
+              <span className="feature-text">Экономьте на каждой покупке</span>
+            </div>
+          </div>
+          
+          <button onClick={startChat} className="cta-button">
+            Попробовать бесплатно
+          </button>
+        </div>
+      </div>
+    );
   }
 
   // Credits Page (after 5 questions)
   if (creditsShown) {
-    return <CreditsPage onContinue={continueWithPayment} />;
+    return (
+      <div className="credits-container">
+        <div className="credits-content">
+          <div className="credits-header">
+            <div className="header-title">Лимит исчерпан</div>
+          </div>
+          
+          <div className="credits-graphic">
+            <div className="shock-emoji">😱</div>
+          </div>
+          
+          <h2 className="credits-title">Лимит бесплатных вопросов исчерпан</h2>
+          
+          <div className="credits-description">
+            <p>Продолжите использование за <strong>49 ₽</strong></p>
+          </div>
+          
+          <button onClick={continueWithPayment} className="credits-cta-button">
+            Продолжить за 49 ₽
+          </button>
+        </div>
+      </div>
+    );
   }
 
   // Limit Page (final page)
   if (limitReached) {
-    return <LimitPage onReset={resetApp} />;
+    return (
+      <div className="credits-container">
+        <div className="credits-content">
+          <div className="credits-header">
+            <div className="header-title">Лимит исчерпан</div>
+          </div>
+          
+          <div className="credits-graphic">
+            <div className="shock-emoji">😱</div>
+          </div>
+          
+          <h2 className="credits-title">Лимит бесплатных вопросов исчерпан</h2>
+          
+          <div className="credits-description">
+            <p>Продукта не существует.</p>
+          </div>
+          
+          <button onClick={resetApp} className="credits-cta-button">
+            Начать заново
+          </button>
+        </div>
+      </div>
+    );
   }
 
   // Chat Page
   return (
-    <div className="app">
-      <div className="chat-container">
-        <div className="messages">
-          {messages.map((message, index) => (
-            <div key={index} className={`message ${message.isUser ? 'user' : 'ai'}`}>
+    <div className="main-chat-layout">
+      <div className="chat-window">
+        {messages.length === 0 ? (
+          <div className="placeholder-message">
+            Здравствуйте! Я помогу вам с вопросами по системе лояльности «Альфа-Выгодно» и «Витрина партнёров». Задайте ваш вопрос!
+          </div>
+        ) : (
+          messages.map((message, index) => (
+            <div key={index} className={`chat-bubble ${message.isUser ? 'user' : 'ai'}`}>
               {message.text}
             </div>
-          ))}
-          {isLoading && (
-            <div className="message ai loading">
-              <div className="typing-indicator">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
+          ))
+        )}
+        {isLoading && (
+          <div className="chat-bubble ai">
+            <div className="typing-indicator">
+              <span></span>
+              <span></span>
+              <span></span>
             </div>
-          )}
-        </div>
-        
-        <div className="input-container">
-          <div className="question-counter">
-            Вопросов: {questionCount}/5
           </div>
-          <div className="input-wrapper">
-            <textarea
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Задайте вопрос о системе лояльности Альфа-Выгодно..."
-              disabled={isLoading}
-              rows={3}
-            />
-            <button 
-              onClick={sendMessage} 
-              disabled={!inputMessage.trim() || isLoading}
-              className="send-button"
-            >
-              Отправить
-            </button>
-          </div>
-        </div>
+        )}
+      </div>
+      
+      <div className="chat-input">
+        <input
+          type="text"
+          value={inputMessage}
+          onChange={(e) => setInputMessage(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="Введите сообщение..."
+          disabled={isLoading}
+        />
+        <button 
+          onClick={sendMessage} 
+          disabled={!inputMessage.trim() || isLoading}
+        >
+          Отправить
+        </button>
       </div>
     </div>
   );

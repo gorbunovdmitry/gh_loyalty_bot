@@ -166,16 +166,14 @@ app.post('/api/chat', async (req, res) => {
   const promptCount = req.body.promptcount;
   if (!userMessage) return res.status(400).json({ reply: 'Нет сообщения' });
 
-  // ЖЕСТКИЙ ФИЛЬТР: Если вопрос не про систему лояльности - блокируем
-  const loyaltyKeywords = ['альфа-выгодно', 'выгодно', 'кэшбэк', 'баллы', 'бонусы', 'партнеры', 'витрина', 'лояльность', 'скидки', 'акции', 'альфа-тревел', 'альфа-заправки', 'альфа-афиша'];
-  const blockedKeywords = ['политика', 'религия', 'война', 'медицина', 'безопасность', 'психология', 'законы', 'инвестиции', 'тарифы', 'ставки', 'доходность'];
+  // ФИЛЬТР: Блокируем только явно запрещенные темы
+  const blockedKeywords = ['политика', 'религия', 'война', 'медицина', 'безопасность', 'психология', 'законы', 'инвестиции', 'тарифы', 'ставки', 'доходность', 'жку', 'жилищно-коммунальные', 'коммунальные услуги', 'электричество', 'вода', 'газ', 'отопление', 'мусор', 'уборка', 'ремонт'];
   
   const userMessageLower = userMessage.toLowerCase();
-  const hasLoyaltyKeyword = loyaltyKeywords.some(keyword => userMessageLower.includes(keyword));
   const hasBlockedKeyword = blockedKeywords.some(keyword => userMessageLower.includes(keyword));
   
-  // Блокируем ВСЕ вопросы не связанные с лояльностью
-  if (hasBlockedKeyword || !hasLoyaltyKeyword) {
+  // Блокируем только явно запрещенные темы
+  if (hasBlockedKeyword) {
     return res.json({ 
       reply: 'Я помогаю только по вопросам системы лояльности «Альфа-Выгодно» и «Витрина партнёров». Пожалуйста, задайте вопрос по этим темам.' 
     });

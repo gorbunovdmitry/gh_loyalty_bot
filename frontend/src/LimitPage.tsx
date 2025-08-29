@@ -2,8 +2,8 @@ import React, { useEffect } from "react";
 
 export default function LimitPage() {
   useEffect(() => {
-    if ((window as any).gtag) (window as any).gtag('event', '0000_end_page_view');
-    if ((window as any).ym) (window as any).ym(96171108, 'reachGoal', '0000_end_page_view');
+    if ((window as any).gtag) (window as any).gtag('event', '6191_end_page_view_var1');
+    if ((window as any).ym) (window as any).ym(96171108, 'reachGoal', '6191_end_page_view_var1');
   }, []);
   return (
     <div style={{

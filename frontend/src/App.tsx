@@ -93,10 +93,12 @@ function App() {
   };
 
   useEffect(() => {
-    // Событие первого рендера
-    sendAnalyticsEvent('0000_page_view');
+    // Событие просмотра экрана чат-бота
+    if (!showLanding && !showCredits && !limitReached) {
+      sendAnalyticsEvent('6191_page_view_bot_var1');
+    }
   // eslint-disable-next-line
-  }, []);
+  }, [showLanding, showCredits, limitReached]);
 
   const handleStartChat = () => {
     setShowLanding(false);
@@ -142,7 +144,7 @@ function App() {
       ]);
     }
     setLoading(false);
-    sendAnalyticsEvent('0000_click_send');
+    // Аналитика отправки сообщения не нужна по требованиям
   };
 
   if (showLanding) {
@@ -154,7 +156,7 @@ function App() {
   }
 
   if (limitReached) {
-    sendAnalyticsEvent('0000_end_page_view');
+    sendAnalyticsEvent('6191_end_page_view_var1');
     return <LimitPage />;
   }
 

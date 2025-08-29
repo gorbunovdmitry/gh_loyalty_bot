@@ -7,14 +7,14 @@ interface CreditsPageProps {
 export default function CreditsPage({ onContinue }: CreditsPageProps) {
   useEffect(() => {
     // Аналитика для страницы кредитов
-    if ((window as any).gtag) (window as any).gtag('event', '0000_credits_page_view');
-    if ((window as any).ym) (window as any).ym(96171108, 'reachGoal', '0000_credits_page_view');
+    if ((window as any).gtag) (window as any).gtag('event', '6191_page_view_credits_var1');
+    if ((window as any).ym) (window as any).ym(96171108, 'reachGoal', '6191_page_view_credits_var1');
   }, []);
 
   const handleContinueClick = () => {
-    // Аналитика клика
-    if ((window as any).gtag) (window as any).gtag('event', '0000_credits_click');
-    if ((window as any).ym) (window as any).ym(96171108, 'reachGoal', '0000_credits_click');
+    // Аналитика клика на кнопку "Купить за 49 р"
+    if ((window as any).gtag) (window as any).gtag('event', '6191_click_buy_var1');
+    if ((window as any).ym) (window as any).ym(96171108, 'reachGoal', '6191_click_buy_var1');
     onContinue();
   };
 

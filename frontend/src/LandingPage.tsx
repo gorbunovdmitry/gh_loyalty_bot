@@ -13,15 +13,15 @@ interface LandingPageProps {
 
 export default function LandingPage({ onStartChat }: LandingPageProps) {
   useEffect(() => {
-    // Аналитика для лендинга
-    if ((window as any).gtag) (window as any).gtag('event', '0000_landing_view');
-    if ((window as any).ym) (window as any).ym(96171108, 'reachGoal', '0000_landing_view');
+    // Аналитика для лендинга - только при первом рендере
+    if ((window as any).gtag) (window as any).gtag('event', '6191_page_view_landing_var1');
+    if ((window as any).ym) (window as any).ym(96171108, 'reachGoal', '6191_page_view_landing_var1');
   }, []);
 
   const handleStartClick = () => {
-    // Аналитика клика
-    if ((window as any).gtag) (window as any).gtag('event', '0000_landing_click');
-    if ((window as any).ym) (window as any).ym(96171108, 'reachGoal', '0000_landing_click');
+    // Аналитика клика на кнопку "Попробовать бесплатно"
+    if ((window as any).gtag) (window as any).gtag('event', '6191_click_continue_var1');
+    if ((window as any).ym) (window as any).ym(96171108, 'reachGoal', '6191_click_continue_var1');
     onStartChat();
   };
 

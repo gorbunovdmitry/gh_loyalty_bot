@@ -113,7 +113,7 @@ function App() {
           </h1>
           
           <p className="landing-description">
-            Получите персональные рекомендации по выгодным покупкам и узнайте, когда лучше тратить деньги
+            Теперь вы можете заранее узнавать, где выгоднее делать покупки: сообщим вам как о сезонных распродажах, так и о закрытых акциях. Подписка действует одну неделю: вы получаете полный план выгодных покупок и напоминания об акциях. После окончания срока подписку можно обновить.
           </p>
           
           <div className="features-list">
@@ -121,26 +121,33 @@ function App() {
               <div className="feature-icon">
                 <img src="/img/clock.svg" alt="Clock" className="feature-icon-img" />
               </div>
-              <span className="feature-text">Узнайте, когда выгоднее покупать</span>
+              <span className="feature-text">Получайте напоминания о пресейлах и закрытых распродажах с супер-кэшбэком</span>
             </div>
             
             <div className="feature-item">
               <div className="feature-icon">
                 <img src="/img/percent.svg" alt="Percent" className="feature-icon-img" />
               </div>
-              <span className="feature-text">Получите максимальный кэшбэк</span>
+              <span className="feature-text">Узнавайте, какие категории дают максимум выгоды именно сейчас</span>
             </div>
             
             <div className="feature-item">
               <div className="feature-icon">
                 <img src="/img/rub-flag.svg" alt="Rub Flag" className="feature-icon-img" />
               </div>
-              <span className="feature-text">Экономьте на каждой покупке</span>
+              <span className="feature-text">Следите за сезонными акциями с кэшбэком до 100% — от одежды до путешествий</span>
+            </div>
+            
+            <div className="feature-item">
+              <div className="feature-icon">
+                <img src="/img/credit.svg" alt="Credit" className="feature-icon-img" />
+              </div>
+              <span className="feature-text">Каждую неделю — новый актуальный выгодный календарь</span>
             </div>
           </div>
           
           <button onClick={startChat} className="cta-button">
-            Попробовать бесплатно
+            Подключить за 99 ₽
           </button>
         </div>
       </div>
@@ -207,7 +214,7 @@ function App() {
       <div className="chat-window">
         {messages.length === 0 ? (
           <div className="placeholder-message">
-            Здравствуйте! Я помогу вам с вопросами по системе лояльности «Альфа-Выгодно» и «Витрина партнёров». Задайте ваш вопрос!
+            Здравствуйте! Чем я могу вам помочь по вопросам жилищно-коммунальных услуг или сервисам Альфа-Банка?
           </div>
         ) : (
           messages.map((message, index) => (

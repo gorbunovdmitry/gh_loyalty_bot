@@ -227,3 +227,4 @@ const PORT = process.env.PORT || 5002;
 app.listen(PORT, () => console.log(`Backend started on port ${PORT}`)); // Force Render update Thu Aug 28 17:10:58 MSK 2025
 // Force Render update Thu Aug 28 17:19:39 MSK 2025
 // FINAL RENDER UPDATE: Ultra-aggressive loyalty-only system prompt - Thu Aug 28 17:30:00 MSK 2025
+// WEBHOOK TEST: Testing GitHub webhook integration - Thu Aug 28 17:45:00 MSK 2025

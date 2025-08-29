@@ -1,257 +1,203 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
+import LimitPage from './LimitPage';
+import LandingPage from './LandingPage';
+import CreditsPage from './CreditsPage';
 
 const BACKEND_URL = 'https://gh-loyalty-bot.onrender.com';
 
+function formatAIText(text: string) {
+  // Заменяем **жирный** и *курсив* и \n на переносы строк, а также списки
+  let formatted = text
+    .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+    .replace(/\*(.*?)\*/g, '<i>$1</i>')
+    .replace(/\n/g, '<br/>')
+    .replace(/^- (.*)$/gm, '<li>$1</li>');
+  // Если есть <li>, обернуть в <ul>
+  if (/<li>/.test(formatted)) {
+    formatted = formatted.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+  }
+  return formatted;
+}
+
 function App() {
   const [messages, setMessages] = useState<Array<{text: string, isUser: boolean}>>([]);
-  const [inputMessage, setInputMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [questionCount, setQuestionCount] = useState(0);
-  const [landingShown, setLandingShown] = useState(false);
-  const [creditsShown, setCreditsShown] = useState(false);
-  const [limitReached, setLimitReached] = useState(false);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [dots, setDots] = useState(1);
+  const [showLanding, setShowLanding] = useState(
+    localStorage.getItem('landingShown') !== '1'
+  );
+  const [showCredits, setShowCredits] = useState(false);
+
+  const LIMIT = 5;
+  const [questionCount, setQuestionCount] = useState(
+    Number(localStorage.getItem('questionCount') || 0)
+  );
+  const [limitReached, setLimitReached] = useState(
+    localStorage.getItem('limitReached') === '1'
+  );
+
+  const chatWindowRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const savedCount = localStorage.getItem('questionCount');
-    const savedLanding = localStorage.getItem('landingShown');
-    const savedCredits = localStorage.getItem('creditsShown');
-    const savedLimit = localStorage.getItem('limitReached');
-    
-    if (savedCount) setQuestionCount(parseInt(savedCount));
-    if (savedLanding === 'true') setLandingShown(true);
-    if (savedCredits === 'true') setCreditsShown(true);
-    if (savedLimit === 'true') setLimitReached(true);
+    if (!loading) {
+      setDots(1);
+      return;
+    }
+    const interval = setInterval(() => {
+      setDots(prev => (prev % 3) + 1);
+    }, 500);
+    return () => clearInterval(interval);
+  }, [loading]);
+
+  useEffect(() => {
+    if (chatWindowRef.current) {
+      chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  // JS-fix для мобильных: динамическая высота контейнера
+  useEffect(() => {
+    const setContainerHeight = () => {
+      if (chatContainerRef.current) {
+        chatContainerRef.current.style.height = window.innerHeight + 'px';
+      }
+    };
+    setContainerHeight();
+    window.addEventListener('resize', setContainerHeight);
+    // Фокус на input/textarea
+    const inputs = document.querySelectorAll('input, textarea');
+    inputs.forEach(inp => {
+      inp.addEventListener('focus', setContainerHeight);
+      inp.addEventListener('blur', setContainerHeight);
+    });
+    return () => {
+      window.removeEventListener('resize', setContainerHeight);
+      inputs.forEach(inp => {
+        inp.removeEventListener('focus', setContainerHeight);
+        inp.removeEventListener('blur', setContainerHeight);
+      });
+    };
   }, []);
 
-  const sendMessage = async () => {
-    if (!inputMessage.trim() || isLoading) return;
+  // Аналитика: отправка событий
+  const sendAnalyticsEvent = (event: string) => {
+    if ((window as any).gtag) {
+      (window as any).gtag('event', event);
+    }
+    if ((window as any).ym) {
+      (window as any).ym(96171108, 'reachGoal', event);
+    }
+  };
 
-    const userMessage = inputMessage.trim();
-    setInputMessage('');
-    setIsLoading(true);
+  useEffect(() => {
+    // Событие первого рендера
+    sendAnalyticsEvent('0000_page_view');
+  // eslint-disable-next-line
+  }, []);
 
-    // Add user message
-    const newMessages = [...messages, { text: userMessage, isUser: true }];
-    setMessages(newMessages);
+  const handleStartChat = () => {
+    setShowLanding(false);
+    localStorage.setItem('landingShown', '1');
+  };
+
+  const handleCreditsContinue = () => {
+    setShowCredits(false);
+    setLimitReached(true);
+    localStorage.setItem('limitReached', '1');
+  };
+
+  const sendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || limitReached) return;
+    const userMsg = { text: input, isUser: true };
+    setMessages((msgs) => [...msgs, userMsg]);
+    setInput('');
+    setLoading(true);
+
+    const newCount = questionCount + 1;
+    setQuestionCount(newCount);
+    localStorage.setItem('questionCount', newCount.toString());
+    if (newCount >= LIMIT) {
+      setShowCredits(true);
+    }
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/chat`, {
+      const res = await fetch(BACKEND_URL + '/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: userMessage,
-          promptcount: questionCount + 1
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: input, promptcount: newCount }),
       });
-
-      const data = await response.json();
-      
-      // Add AI response
-      setMessages([...newMessages, { text: data.reply, isUser: false }]);
-      
-      // Update question count
-      const newCount = questionCount + 1;
-      setQuestionCount(newCount);
-      localStorage.setItem('questionCount', newCount.toString());
-      
-      // Check limit - show credits page after 5 questions
-      if (newCount >= 5 && !creditsShown) {
-        setCreditsShown(true);
-        localStorage.setItem('creditsShown', 'true');
-      }
-      
-    } catch (error) {
-      console.error('Error:', error);
-      setMessages([...newMessages, { text: 'Ошибка соединения с сервером', isUser: false }]);
+      const data = await res.json();
+      setMessages((msgs) => [
+        ...msgs,
+        { text: data.reply || 'Ошибка ответа AI', isUser: false },
+      ]);
+    } catch {
+      setMessages((msgs) => [
+        ...msgs,
+        { text: 'Ошибка соединения с сервером', isUser: false },
+      ]);
     }
-
-    setIsLoading(false);
+    setLoading(false);
+    sendAnalyticsEvent('0000_click_send');
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
-
-  const startChat = () => {
-    setLandingShown(true);
-    localStorage.setItem('landingShown', 'true');
-  };
-
-  const continueWithPayment = () => {
-    setCreditsShown(false);
-    setLimitReached(true);
-    localStorage.setItem('creditsShown', 'false');
-    localStorage.setItem('limitReached', 'true');
-  };
-
-  const resetApp = () => {
-    setMessages([]);
-    setQuestionCount(0);
-    setLandingShown(false);
-    setCreditsShown(false);
-    setLimitReached(false);
-    localStorage.clear();
-  };
-
-  // Landing Page
-  if (!landingShown) {
-    return (
-      <div className="landing-container">
-        <div className="landing-content">
-          <div className="landing-graphic">
-            <img src="/img/calendar.png" alt="Calendar" className="main-calendar" />
-          </div>
-          
-          <h1 className="landing-title">
-            Календарь вашей выгоды на неделю
-          </h1>
-          
-          <p className="landing-description">
-            Теперь вы можете заранее узнавать, где выгоднее делать покупки: сообщим вам как о сезонных распродажах, так и о закрытых акциях. Подписка действует одну неделю: вы получаете полный план выгодных покупок и напоминания об акциях. После окончания срока подписку можно обновить.
-          </p>
-          
-          <div className="features-list">
-            <div className="feature-item">
-              <div className="feature-icon">
-                <img src="/img/clock.svg" alt="Clock" className="feature-icon-img" />
-              </div>
-              <span className="feature-text">Получайте напоминания о пресейлах и закрытых распродажах с супер-кэшбэком</span>
-            </div>
-            
-            <div className="feature-item">
-              <div className="feature-icon">
-                <img src="/img/percent.svg" alt="Percent" className="feature-icon-img" />
-              </div>
-              <span className="feature-text">Узнавайте, какие категории дают максимум выгоды именно сейчас</span>
-            </div>
-            
-            <div className="feature-item">
-              <div className="feature-icon">
-                <img src="/img/rub-flag.svg" alt="Rub Flag" className="feature-icon-img" />
-              </div>
-              <span className="feature-text">Следите за сезонными акциями с кэшбэком до 100% — от одежды до путешествий</span>
-            </div>
-            
-            <div className="feature-item">
-              <div className="feature-icon">
-                <img src="/img/credit.svg" alt="Credit" className="feature-icon-img" />
-              </div>
-              <span className="feature-text">Каждую неделю — новый актуальный выгодный календарь</span>
-            </div>
-          </div>
-          
-          <button onClick={startChat} className="cta-button">
-            Подключить за 99 ₽
-          </button>
-        </div>
-      </div>
-    );
+  if (showLanding) {
+    return <LandingPage onStartChat={handleStartChat} />;
   }
 
-  // Credits Page (after 5 questions)
-  if (creditsShown) {
-    return (
-      <div className="credits-container">
-        <div className="credits-content">
-          <div className="credits-header">
-            <div className="header-title">Лимит исчерпан</div>
-          </div>
-          
-          <div className="credits-graphic">
-            <div className="shock-emoji">😱</div>
-          </div>
-          
-          <h2 className="credits-title">Лимит бесплатных вопросов исчерпан</h2>
-          
-          <div className="credits-description">
-            <p>Продолжите использование за <strong>49 ₽</strong></p>
-          </div>
-          
-          <button onClick={continueWithPayment} className="credits-cta-button">
-            Продолжить за 49 ₽
-          </button>
-        </div>
-      </div>
-    );
+  if (showCredits) {
+    return <CreditsPage onContinue={handleCreditsContinue} />;
   }
 
-  // Limit Page (final page)
   if (limitReached) {
-    return (
-      <div className="credits-container">
-        <div className="credits-content">
-          <div className="credits-header">
-            <div className="header-title">Лимит исчерпан</div>
-          </div>
-          
-          <div className="credits-graphic">
-            <div className="shock-emoji">😱</div>
-          </div>
-          
-          <h2 className="credits-title">Лимит бесплатных вопросов исчерпан</h2>
-          
-          <div className="credits-description">
-            <p>Продукта не существует.</p>
-          </div>
-          
-          <button onClick={resetApp} className="credits-cta-button">
-            Начать заново
-          </button>
-        </div>
-      </div>
-    );
+    sendAnalyticsEvent('0000_end_page_view');
+    return <LimitPage />;
   }
 
-  // Chat Page
   return (
-    <div className="main-chat-layout">
-      <div className="chat-window">
-        {messages.length === 0 ? (
+    <div className="chat-container" ref={chatContainerRef}>
+      <div className={"chat-window" + (messages.length === 0 && !loading ? " empty" : "")} ref={chatWindowRef}>
+        {messages.length === 0 && !loading && (
           <div className="placeholder-message">
-            Здравствуйте! Чем я могу вам помочь по вопросам жилищно-коммунальных услуг или сервисам Альфа-Банка?
-          </div>
-        ) : (
-          messages.map((message, index) => (
-            <div key={index} className={`chat-bubble ${message.isUser ? 'user' : 'ai'}`}>
-              {message.text}
-            </div>
-          ))
-        )}
-        {isLoading && (
-          <div className="chat-bubble ai">
-            <div className="typing-indicator">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
+            Я - ИИ-ассистент Альфа-Банка по системе лояльности.
+            {"\n"}
+            Помогаю с вопросами по кэшбэку, баллам и партнёрским предложениям.
+            {"\n"}
+            Пожалуйста, не указывайте ФИО, номер счета и другие личные данные.
           </div>
         )}
+        {messages.map((msg, i) => (
+          !msg.isUser ? (
+            <div
+              key={i}
+              className={`chat-bubble ${msg.isUser ? 'user' : 'ai'}`}
+              dangerouslySetInnerHTML={{ __html: formatAIText(msg.text) }}
+            />
+          ) : (
+            <div
+              key={i}
+              className={`chat-bubble ${msg.isUser ? 'user' : 'ai'}`}
+            >
+              {msg.text}
+            </div>
+          )
+        ))}
+        {loading && <div className="chat-bubble ai">AI печатает{".".repeat(dots)}</div>}
       </div>
-      
-      <div className="chat-input">
+      <form className="chat-input" onSubmit={sendMessage}>
         <input
-          type="text"
-          value={inputMessage}
-          onChange={(e) => setInputMessage(e.target.value)}
-          onKeyPress={handleKeyPress}
+          value={input}
+          onChange={e => setInput(e.target.value)}
           placeholder="Введите сообщение..."
-          disabled={isLoading}
         />
-        <button 
-          onClick={sendMessage} 
-          disabled={!inputMessage.trim() || isLoading}
-        >
-          Отправить
-        </button>
-      </div>
+        <button type="submit" disabled={loading}>Отправить</button>
+      </form>
     </div>
   );
 }
 
-export default App;
+export default App; 
